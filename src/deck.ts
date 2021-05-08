@@ -64,6 +64,17 @@ export class Deck {
     });
   }
 
+  shuffle():void {
+    const len = this.cards.length - 2;
+    for (let i = 0; i < len; i++) {
+      const idx = Math.round(Math.random() * (len - i) + i);
+
+      const dest = this.cards[idx];
+      this.cards[idx] = this.cards[i];
+      this.cards[i] = dest;
+    }
+  }
+
   print():void {
     this.cards.forEach(card => console.log(card.shortLabel));
     console.log(this.cards.map(c => c.unicode).join(' '));
