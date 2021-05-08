@@ -59,6 +59,19 @@ export class Card {
     const pt:number = base + (this.suite + 10) * 16 + this.rank + 1;
     return String.fromCodePoint(pt);
   }
+
+  public betterThan(card:Card):boolean {
+    // Ace cards win
+    if (this.rank === 1) return true;
+    if (card.rank === 1) return false;
+
+    // Otherwise, it's numeric
+    return card.rank > this.rank;
+  }
+
+  public equalTo(card:Card):boolean {
+    return this.rank === card.rank;
+  }
 }
 
 export class Deck {
