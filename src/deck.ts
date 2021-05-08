@@ -68,7 +68,7 @@ export class Card {
     if (card.rank === 1) return false;
 
     // Otherwise, it's numeric
-    return card.rank > this.rank;
+    return card.rank < this.rank;
   }
 
   public equalTo(card:Card):boolean {
