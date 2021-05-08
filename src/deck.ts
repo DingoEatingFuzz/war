@@ -88,13 +88,14 @@ export class Deck {
   }
 
   shuffle():void {
-    const len = this.cards.length - 2;
-    for (let i = 0; i < len; i++) {
-      const idx = Math.round(Math.random() * (len - i) + i);
+    let len = this.cards.length;
+    while (len) {
+      len--;
+      const idx = Math.floor(Math.random() * len);
 
-      const dest = this.cards[idx];
-      this.cards[idx] = this.cards[i];
-      this.cards[i] = dest;
+      const dest = this.cards[len];
+      this.cards[len] = this.cards[idx];
+      this.cards[idx] = dest;
     }
   }
 
