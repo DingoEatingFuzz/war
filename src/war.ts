@@ -7,9 +7,17 @@ import { Deck, Card } from './deck';
 class Play {
   public player:Player;
   public cards:Array<Card>;
+
+  public hand:Array<Card>;
+  public handSize:number;
+
+
   constructor(player:Player, cards:Card | Array<Card>) {
     this.player = player;
     this.cards = cards instanceof Card ? [cards] : cards;
+
+    this.hand = this.player.hand.slice();
+    this.handSize = this.hand.length;
   }
 
   get activeCard():Card {
@@ -60,6 +68,10 @@ class Player {
     this.position = position;
     this.hand = hand;
   }
+
+  public win(cards:Array<Card>) {
+    this.hand.unshift(...cards);
+  }
 }
 
 export default class War {
@@ -85,7 +97,7 @@ export default class War {
     this.deck.shuffle();
     this.deal();
 
-    while (this.playersRemain() && rounds.length < 1000) {
+    while (this.playersRemain() && rounds.length < 10000) {
       rounds.push(this.playRound());
     }
 
@@ -108,13 +120,13 @@ export default class War {
     if (survivors.length === 1) {
       // Declare winner
       round.winner = survivors[0];
-      round.winner.hand.push(...round.cards);
+      round.winner.win(round.cards);
       return round;
     }
 
     // TODO: Start a war
     round.winner = survivors[0];
-    round.winner.hand.push(...round.cards);
+    round.winner.win(round.cards);
     return round;
   }
 
