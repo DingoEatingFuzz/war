@@ -23,6 +23,15 @@ class Play {
   get activeCard():Card {
     return this.cards[this.cards.length - 1];
   }
+
+  serialize():any {
+    return {
+      player: this.player.position,
+      handSize: this.handSize,
+      hand: this.hand.map(c => c.serialize()),
+      cards: this.cards.map(c => c.serialize())
+    }
+  }
 }
 
 class Match {
@@ -43,6 +52,12 @@ class Match {
 
     return winners;
   }
+
+  serialize():any {
+    return {
+      plays: this.plays.map(p => p.serialize()),
+    }
+  }
 }
 
 class Round {
@@ -57,6 +72,13 @@ class Round {
       });
     });
     return cards;
+  }
+
+  serialize():any {
+    return {
+      winner: this.winner && this.winner.position,
+      matches: this.matches.map(m => m.serialize()),
+    }
   }
 }
 

@@ -74,6 +74,13 @@ export class Card {
   public equalTo(card:Card):boolean {
     return this.rank === card.rank;
   }
+
+  public serialize():any {
+    return {
+      suite: this.suite,
+      rank: this.rank,
+    }
+  }
 }
 
 export class Deck {

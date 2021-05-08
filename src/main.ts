@@ -9,6 +9,8 @@ deck.shuffle();
 
 const war = new War(deck, 2, Shuffles.FisherYates);
 const game = war.play();
+const serialized = game.map(r => r.serialize());
+console.log(JSON.stringify(serialized).length);
 
 const gameLog = game.map(round => {
   const match = round.matches[0];
