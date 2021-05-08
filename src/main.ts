@@ -1,18 +1,37 @@
 import './style.css'
 import { Deck } from './deck'
-import War, { Shuffles } from './war'
+import War, { Shuffles, Round } from './war'
+
+const time = (label:string, fn:Function):any => {
+  performance.mark(label + '-s');
+  const ret = fn();
+  performance.mark(label + '-e');
+  performance.measure(label, label + '-s', label + '-e');
+  return ret;
+}
+
+function serialize(rounds:Array<Round>):string {
+  const obj = time('war-serialize', () => rounds.map(r => r.serialize()));
+  return time('war-stringify', () => JSON.stringify(obj));
+}
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 const deck = new Deck();
 deck.shuffle();
 
-const war = new War(deck, 2, Shuffles.FisherYates);
-const game = war.play();
-const serialized = game.map(r => r.serialize());
-console.log(JSON.stringify(serialized).length);
+let game;
+for (let i = 0; i < 100; i++) {
+  const war = new War(deck, 2, Shuffles.FisherYates);
+  game = war.play();
+  const str = serialize(game);
+  time('war-parse', () => JSON.parse(str));
+}
 
-const gameLog = game.map(round => {
+console.table(performance.getEntriesByName('war-play'));
+console.table(performance.getEntriesByName('war-serialize'));
+
+const gameLog = game && game.map(round => {
   const match = round.matches[0];
   const tie = match.plays[0].activeCard.equalTo(match.plays[1].activeCard);
   const playStrs = match.plays.map(p => {
@@ -25,7 +44,7 @@ const gameLog = game.map(round => {
 
 app.innerHTML = `
   <main>
-    <h1>${game.length} Rounds</h1>
+    <h1>${game && game.length} Rounds</h1>
     <ol>
       ${gameLog}
     </ol>

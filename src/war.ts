@@ -60,7 +60,7 @@ class Match {
   }
 }
 
-class Round {
+export class Round {
   public winner:Player | null = null;
   public matches:Array<Match> = [];
 
@@ -145,6 +145,7 @@ export default class War {
   }
 
   play():Array<Round> {
+    performance.mark('war-play-start');
     // A game is played over a series of rounds. It ends when only one player has cards
     const rounds:Array<Round> = [];
 
@@ -156,6 +157,8 @@ export default class War {
       rounds.push(this.playRound());
     }
 
+    performance.mark('war-play-end');
+    performance.measure('war-play', 'war-play-start', 'war-play-end');
     return rounds;
   }
 
