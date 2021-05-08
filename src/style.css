@@ -1,11 +1,13 @@
+html, body {
+  font-size: 12px;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
-  font-size: 12px;
 }
 
 p {
@@ -14,4 +16,21 @@ p {
 
 span.red {
   color: #CC0000;
+}
+
+span.black {
+  color: #000;
+}
+
+ol {
+  list-style-position: inside;
+  font-size: 1rem;
+}
+
+li.tie {
+  font-weight:bold;
+}
+
+li .winner {
+  color: green;
 }

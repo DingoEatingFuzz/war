@@ -5,15 +5,28 @@ import War from './war'
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 const deck = new Deck();
-deck.shuffle();
 deck.print();
+deck.shuffle();
 
 const war = new War(deck, 2);
-console.log(war.play());
+const game = war.play();
+console.log(game);
+
+const gameLog = game.map(round => {
+  const match = round.matches[0];
+  const tie = match.plays[0].activeCard.equalTo(match.plays[1].activeCard);
+  const playStrs = match.plays.map(p => {
+    return `<span class="${p.player === round.winner ? 'winner' : ''}">
+      ${'|'.repeat(p.handSize)} <span class="${p.activeCard.isRed ? 'red' : 'black' }">${p.activeCard.unicode} ${p.activeCard.shortLabel}</span>
+    </span>`;
+  });
+  return `<li class="${tie ? 'tie' : ''}">${playStrs.join(' v. ')}</li>`;
+}).join('\n');
 
 app.innerHTML = `
-  <h1>Hello Vite!</h1>
-  <p>
-    ${deck.cards.map(c => `<span class="${c.isRed ? 'red' : 'black'}">${c.unicode}</span>`).join('\n')}
-  </p>
+  <main>
+    <ol>
+      ${gameLog}
+    </ol>
+  </main>
 `
