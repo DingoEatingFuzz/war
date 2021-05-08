@@ -9,5 +9,7 @@ deck.print();
 
 app.innerHTML = `
   <h1>Hello Vite!</h1>
-  <p>${deck.str}</p>
+  <p>
+    ${deck.cards.map(c => `<span class="${c.isRed ? 'red' : 'black'}">${c.unicode}</span>`).join('\n')}
+  </p>
 `

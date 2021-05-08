@@ -11,3 +11,7 @@
 p {
   font-size: 4rem;
 }
+
+span.red {
+  color: #CC0000;
+}

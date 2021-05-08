@@ -18,6 +18,14 @@ export class Card {
     return this.suite * 13 + this.rank;
   }
 
+  get isRed():boolean {
+    return this.suite === Suites.Hearts || this.suite === Suites.Diamonds;
+  }
+
+  get isBlack():boolean {
+    return this.suite === Suites.Spades || this.suite === Suites.Clubs;
+  }
+
   get rankLabel():string {
     if (this.rank === 1) return 'A';
     if (this.rank > 10) return 'JQK'[this.rank - 11];
