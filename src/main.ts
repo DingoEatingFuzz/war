@@ -1,16 +1,14 @@
 import './style.css'
 import { Deck } from './deck'
-import War from './war'
+import War, { Shuffles } from './war'
 
 const app = document.querySelector<HTMLDivElement>('#app')!
 
 const deck = new Deck();
-deck.print();
 deck.shuffle();
 
-const war = new War(deck, 2);
+const war = new War(deck, 2, Shuffles.FisherYates);
 const game = war.play();
-console.log(game);
 
 const gameLog = game.map(round => {
   const match = round.matches[0];
@@ -25,6 +23,7 @@ const gameLog = game.map(round => {
 
 app.innerHTML = `
   <main>
+    <h1>${game.length} Rounds</h1>
     <ol>
       ${gameLog}
     </ol>

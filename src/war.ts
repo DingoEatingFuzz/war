@@ -72,18 +72,51 @@ class Player {
   public win(cards:Array<Card>) {
     this.hand.unshift(...cards);
   }
+
+  public deal():Card {
+    if (!this.hand.length) throw new Error('Cannot deal with an empty hand');
+    return this.hand.pop() as Card;
+  }
+}
+
+export class Shuffles {
+  static None(list:Array<any>):Array<any> {
+    return list.slice();
+  }
+
+  static FisherYates(list:Array<any>):Array<any> {
+    const _list = list.slice();
+    let len = _list.length;
+
+    while (len) {
+      len--;
+      const idx = Math.floor(Math.random() * len);
+
+      const dest = _list[len];
+      _list[len] = _list[idx];
+      _list[idx] = dest;
+    }
+
+    return _list;
+  }
+
+  static Smoosh(list:Array<any>):Array<any> {
+    return list.slice().sort(() => Math.random() * 2 - 1);
+  }
 }
 
 export default class War {
   public deck:Deck;
   public playerCount:number;
+  private winShuffle:Function;
   private players:Array<Player>;
 
   private remainingPlayers:Array<Player> = [];
 
-  constructor(deck:Deck, playerCount = 2) {
+  constructor(deck:Deck, playerCount = 2, winShuffle = Shuffles.None) {
     this.deck = deck;
     this.playerCount = playerCount;
+    this.winShuffle = winShuffle;
     this.players = new Array(this.playerCount)
       .fill(null)
       .map((_, idx) => new Player(idx));
@@ -109,24 +142,42 @@ export default class War {
 
     // First, play a normal round
     const plays:Array<Play> = this.remainingPlayers.map(player => {
-      const card:Card = player.hand.pop() as Card;
+      const card:Card = player.deal() as Card;
       return new Play(player, card);
     });
 
     const match = new Match(plays);
     round.matches.push(match);
-    const survivors:Array<Player> = this.evaluate(match);
+    let survivors:Array<Player> = this.evaluate(match);
 
     if (survivors.length === 1) {
       // Declare winner
       round.winner = survivors[0];
-      round.winner.win(round.cards);
+      round.winner.win(this.winShuffle(round.cards));
       return round;
     }
 
-    // TODO: Start a war
-    round.winner = survivors[0];
-    round.winner.win(round.cards);
+    while (!round.winner) {
+      const plays:Array<Play> = survivors.filter(s => s.hand.length).map(player => {
+        const cards:Array<Card> = [];
+
+        // When playing a war, you play 3 face down cards and 1 face up card, unless
+        // you don't have enough cards, in which case you play as many as you can.
+        while (cards.length < 4 && player.hand.length) {
+          cards.push(player.deal());
+        }
+        return new Play(player, cards);
+      });
+
+      const match = new Match(plays);
+      round.matches.push(match);
+      survivors = this.evaluate(match);
+      if (survivors.length === 1) {
+        round.winner = survivors[0];
+      }
+    }
+
+    round.winner.win(this.winShuffle(round.cards));
     return round;
   }
 
