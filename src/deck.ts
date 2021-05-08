@@ -53,10 +53,12 @@ export class Card {
     // a: base number
     // b: suite digit, starting at A and ordered like the suites enum
     // c: rank digit, starting at 1 and ordered like this class (Ace to King)
+    // NOTE: The 'knight' rank comes between Jack and Queen.
     //
     //                    a  bc
     const base:number = 0x1F000;
-    const pt:number = base + (this.suite + 10) * 16 + this.rank + 1;
+    let pt:number = base + (this.suite + 10) * 16 + this.rank;
+    if (this.rank === 12 || this.rank == 13) pt++;
     return String.fromCodePoint(pt);
   }
 
