@@ -34,3 +34,7 @@ li.tie {
 li .winner {
   color: green;
 }
+
+svg {
+  overflow: visible;
+}
