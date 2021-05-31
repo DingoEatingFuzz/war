@@ -66,6 +66,9 @@ const playHistogram = Plot.plot({
   fy: {
     domain: ['war-play', 'war-serialize', 'war-stringify', 'war-parse'],
   },
+  y: {
+    type: 'sqrt',
+  },
   marks: [
     Plot.rectY(
       perfData,
@@ -89,13 +92,10 @@ const plotData = zip({
 const scatterPoints = expandPlotData(plotData);
 
 const playPlot = Plot.plot({
-  y: {
-    type: 'sqrt',
-  },
   marks: [
     Plot.dot(
       scatterPoints,
-      { x: 'rounds', y: 'duration', stroke: 'series', }
+      { x: 'rounds', y: 'duration', fill: 'series', fillOpacity: 0.7 }
     )
   ]
 });
