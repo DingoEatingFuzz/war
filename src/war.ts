@@ -111,8 +111,8 @@ export class Shuffles {
     let len = _list.length;
 
     while (len) {
-      len--;
       const idx = Math.floor(Math.random() * len);
+      len--;
 
       const dest = _list[len];
       _list[len] = _list[idx];
