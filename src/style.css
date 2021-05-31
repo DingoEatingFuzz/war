@@ -1,17 +1,22 @@
 html, body {
-  font-size: 12px;
+  font-size: 14px;
 }
 
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-align: center;
   color: #2c3e50;
 }
 
+main {
+  width: 100%;
+  max-width: 800px;
+  margin: auto;
+}
+
 p {
-  font-size: 4rem;
+  font-size: 1rem;
 }
 
 span.red {
@@ -37,4 +42,9 @@ li .winner {
 
 svg {
   overflow: visible;
+}
+
+figure {
+  text-align: center;
+  padding: 2rem;
 }

@@ -1,6 +1,7 @@
 import './style.css'
 import { Deck } from './deck'
 import War, { Shuffles, Round } from './war'
+import { stats, zip } from './utils'
 
 import * as Plot from '@observablehq/plot'
 
@@ -22,33 +23,36 @@ const app = document.querySelector<HTMLDivElement>('#app')!
 const deck = new Deck();
 deck.shuffle();
 
-let game;
+const games:Array<Array<Round>> = [];
 for (let i = 0; i < 100; i++) {
   const war = new War(deck, 2, Shuffles.FisherYates);
-  game = war.play();
-  const str = serialize(game);
+  games.push(war.play());
+  const str = serialize(games[0]);
   time('war-parse', () => JSON.parse(str));
 }
-
-// const gameLog = game && game.map(round => {
-//   const match = round.matches[0];
-//   const tie = match.plays[0].activeCard.equalTo(match.plays[1].activeCard);
-//   const playStrs = match.plays.map(p => {
-//     return `<span class="${p.player === round.winner ? 'winner' : ''}">
-//       ${'|'.repeat(p.handSize)} <span class="${p.activeCard.isRed ? 'red' : 'black' }">${p.activeCard.unicode} ${p.activeCard.shortLabel}</span>
-//     </span>`;
-//   });
-//   return `<li class="${tie ? 'tie' : ''}">${playStrs.join(' v. ')}</li>`;
-// }).join('\n');
-const gameLog = '';
 
 app.innerHTML = `
   <main>
     <h1>100 games of war</h1>
-    <div id="graphs"></div>
-    <ol>
-      ${gameLog}
-    </ol>
+
+    <p>The game of war can take any number of rounds. In fact, without any entropy while collecting cards,
+    the game can have cycles resulting in an infinite number of rounds.</p>
+
+    <p>This implementation uses a Fisher-Yates shuffle on the cards collected from a "war" event which breaks
+    cycles, but can still result in incredibly long games. The max number of rounds before calling it a draw is
+    10,000.</p>
+
+    <p>This naturally has an impact on how long the simulation takes to run.</p>
+
+    <figure id="timeByMetric"></figure>
+
+    <h2>Computation time as a function of number of rounds</h2>
+
+    <p>All of our graphs skew left. This is because typically games of War are finished within 500 rounds. However,
+    the extreme cases can go on up to 20x that number, which results in more computation of the simulation and more
+    data that needs to be serialized and deserialized if we want to save it and use it elsewhere.</p>
+
+    <figure id="timeByRounds"></figure>
   </main>
 `
 
@@ -62,23 +66,55 @@ const playHistogram = Plot.plot({
   fy: {
     domain: ['war-play', 'war-serialize', 'war-stringify', 'war-parse'],
   },
-  y: {
-    type: 'sqrt',
-    height: 100,
-  },
   marks: [
     Plot.rectY(
       perfData,
       Plot.binX(
         { y: 'count' },
-        { x: 'duration', fill: 'name', thresholds: 'freedman-diaconis' },
+        { x: 'duration', fill: 'name', thresholds: 75 },
       )
     ),
     Plot.ruleY([0]),
   ]
 });
 
-const graphs = document.querySelector('#graphs');
-if (graphs) {
-  graphs.appendChild(playHistogram);
+const plotData = zip({
+  game: games.map(g => stats(g)),
+  play: performance.getEntriesByName('war-play'),
+  serialize: performance.getEntriesByName('war-serialize'),
+  stringify: performance.getEntriesByName('war-stringify'),
+  parse: performance.getEntriesByName('war-parse'),
+})
+
+const scatterPoints = expandPlotData(plotData);
+
+const playPlot = Plot.plot({
+  y: {
+    type: 'sqrt',
+  },
+  marks: [
+    Plot.dot(
+      scatterPoints,
+      { x: 'rounds', y: 'duration', stroke: 'series', }
+    )
+  ]
+});
+
+const byMetric = document.querySelector('#timeByMetric');
+if (byMetric) byMetric.appendChild(playHistogram);
+
+const timeByRounds = document.querySelector('#timeByRounds');
+if (timeByRounds) timeByRounds.appendChild(playPlot);
+
+// Turn the table of objects into a single set of data points with a series label
+function expandPlotData(data:Array<any>) {
+  const points:Array<any> = [];
+  data.forEach(d => {
+    points.push({ rounds: d.game.count, duration: d.play.duration, series: 'war-play' });
+    points.push({ rounds: d.game.count, duration: d.serialize.duration, series: 'war-serialize' });
+    points.push({ rounds: d.game.count, duration: d.stringify.duration, series: 'war-stringify' });
+    points.push({ rounds: d.game.count, duration: d.parse.duration, series: 'war-parse' });
+  });
+
+  return points;
 }
