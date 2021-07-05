@@ -1,10 +1,10 @@
 import { Deck, Card } from './deck';
 
-// A play represent the cards a player played for a round.
+// A play represents the cards a player played for a round.
 // A standard play is one card.
 // In the event of a tie, a war is started which is played with 4 cards.
 // When a war results in a tie, an additional war is started
-class Play {
+export class Play {
   public player:Player;
   public cards:Array<Card>;
 
@@ -34,7 +34,7 @@ class Play {
   }
 }
 
-class Match {
+export class Match {
   public plays:Array<Play>;
   constructor(plays:Array<Play>) {
     this.plays = plays;
@@ -72,6 +72,10 @@ export class Round {
       });
     });
     return cards;
+  }
+
+  get lastMatch():Match {
+    return this.matches[this.matches.length - 1];
   }
 
   serialize():any {
