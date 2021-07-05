@@ -28,6 +28,7 @@ span.black {
 }
 
 ol {
+  text-align: center;
   list-style-position: inside;
   font-size: 1rem;
 }
@@ -42,6 +43,11 @@ li .winner {
 
 svg {
   overflow: visible;
+}
+
+svg.war-viz {
+  display: block;
+  margin: auto;
 }
 
 figure {
