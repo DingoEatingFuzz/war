@@ -28,12 +28,17 @@ export class Card {
 
   get rankLabel():string {
     if (this.rank === 1) return 'A';
+    if (this.rank === 10) return 'T';
     if (this.rank > 10) return 'JQK'[this.rank - 11];
     return this.rank.toString();
   }
 
   get suiteLabel():string {
     return ['Spades', 'Hearts', 'Diamonds', 'Clubs'][this.suite];
+  }
+
+  get suiteCharacter():string {
+    return ['S', 'H', 'D', 'C'][this.suite];
   }
 
   get suiteEmoji():string {
@@ -46,6 +51,10 @@ export class Card {
 
   get shortLabel():string {
     return `${this.suiteEmoji} ${this.rankLabel}`;
+  }
+
+  get shortTextLabel():string {
+    return this.rankLabel + this.suiteCharacter;
   }
 
   get unicode():string {
