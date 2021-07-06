@@ -5,6 +5,10 @@ import * as d3 from 'd3'
 export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
   const viz = d3.select(elem);
 
+  rounds.forEach(r => {
+    if (r.matches.length > 1) console.log(roundByPlayers(r));
+  });
+
   const deckCardWidth = 3;
   const roundHeight = 15;
   const roundGap = 2;
@@ -59,6 +63,22 @@ function normalizeDecks(plays:Array<Play>): Array<Play|null> {
   const highPlayer:number = plays.reduce((high:number, p:Play) => Math.max(high, p.player.position), 0);
   return new Array(highPlayer).fill(null).map((_:any, i:number) => {
     return plays.find(p => p.player.position === i) || null;
+  });
+}
+
+// A round is organized as a set of matches, but we want to visualize
+// things by player. To make things easier in d3, this transforms the set
+// of matches into a set of players.
+function roundByPlayers(round:Round):any {
+  const players:Array<Player> = round.matches[0].plays.map(p => p.player);
+  return players.map((p:Player) => {
+    const lastPlay = round.lastMatch.forPlayer(p);
+    return {
+      player: p,
+      won: p === round.winner,
+      deck: lastPlay ? lastPlay.hand : [],
+      matches: round.matches.map((m:Match) => m.forPlayer(p)),
+    }
   });
 }
 

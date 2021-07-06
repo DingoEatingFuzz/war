@@ -53,6 +53,10 @@ export class Match {
     return winners;
   }
 
+  forPlayer(player:Player):Play | undefined {
+    return this.plays.find((p:Play) => p.player === player);
+  }
+
   serialize():any {
     return {
       plays: this.plays.map(p => p.serialize()),
