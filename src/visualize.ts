@@ -5,18 +5,42 @@ import * as d3 from 'd3'
 export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
   const viz = d3.select(elem);
 
-  const deckCardWidth = 3;
+  const deckCardWidth = 6;
   const roundHeight = 15;
-  const roundGap = 2;
+  const roundGap = 5;
   const faceupCardWidth = 20;
+
+  const colorBySuite = (card:Card):string => {
+    if (card.rank === 1) return aceColor;
+    return card.isRed ? reds[card.rank] : blacks[card.rank];
+  };
+
+  const colorBySuiteLow = (card:Card):string => {
+    if (card.rank === 1) return aceColor;
+    return card.isRed ? reds[reds.length - 1] : blacks[blacks.length - 1];
+  };
+
+  const colorByWinner = (card:Card, won:boolean):string => {
+    if (card.rank === 1) return aceColor;
+    return won ? reds[card.rank] : blacks[card.rank];
+  }
+
+  const colorByWinnerLow = (card:Card, won:boolean):string => {
+    if (card.rank === 1) return aceColor;
+    return won ? reds[reds.length - 1] : blacks[blacks.length - 1];
+  }
+
+  const colorer = colorByWinner;
 
   // const reds = d3.quantize(d3.interpolateLab('#cc7050', '#c90000'), 14);
   // const blacks = d3.quantize(d3.interpolateLab('#3a6266', '#07090c'), 14);
   // const aceColor = '#f8ff21';
 
-  const reds = d3.quantize(d3.interpolateLab('#d871ae', '#c60606'), 14);
-  const blacks = d3.quantize(d3.interpolateLab('#b3c5c6', '#5c5e60'), 14);
-  const aceColor = '#e8c638';
+  // const reds = d3.quantize(d3.interpolateLab('#c45284', '#8f1414'), 14);
+  // const blacks = d3.quantize(d3.interpolateLab('#112d6b', '#07090c'), 14);
+  const reds = d3.quantize(d3.interpolateLab('#bf3939', '#8f1414'), 14);
+  const blacks = d3.quantize(d3.interpolateLab('#25334d', '#07090c'), 14);
+  const aceColor = '#ffda3e';
 
   viz
     .attr('class', 'war-viz')
@@ -37,7 +61,7 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
     .enter()
       .append('g')
       .attr('class', 'player')
-      .attr('transform', (_:any, i:number) => `scale(${i === 0 ? '-1' : '1'} 1) translate(${i === 1 ? roundGap : 0} 0)`);
+      .attr('transform', (_:any, i:number) => `scale(${i === 0 ? '-1' : '1'} 1) translate(${roundGap * 2} 0)`);
 
   // Each round has the following components:
   // 1. the deck of each player
@@ -52,10 +76,10 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
       .append('rect')
       .attr('class', 'deck-card')
       .attr('x', (_:any, i:number) => i * deckCardWidth)
-      .attr('width', deckCardWidth)
+      .attr('width', deckCardWidth - 1)
       .attr('height', roundHeight)
       .attr('title', (d:any) => d.label)
-      .style('fill', (d:any) => d.card.rank === 1 ? aceColor : d.won ? reds[d.card.rank] : blacks[d.card.rank]);
+      .style('fill', (d:any) => colorer(d.card, d.won));
 
   // 2. all the plays
   const $plays = $players
@@ -76,15 +100,15 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
       .append('rect')
       .attr('class', 'play-card')
       .attr('x', (d:any, i:number) => i * deckCardWidth + d.round.play.playIndex * (faceupCardWidth + deckCardWidth))
-      .attr('width', deckCardWidth)
+      .attr('width', deckCardWidth - 1)
       .attr('height', roundHeight)
       .attr('title', (d:any) => d.card.label)
-      .style('fill', (d:any) => d.card.rank === 1 ? aceColor : d.round.round.won ? reds[d.card.rank] : blacks[d.card.rank]);
+      .style('fill', (d:any) => colorer(d.card, d.round.round.won));
 
   // 2. the face up card of each player
   $plays
     .selectAll('.faceup-card')
-    .data((d:any) => [{ card: d.play.cards[d.play.cards.length - 1], round: d, position: d.play.cards.length + 1 }])
+    .data((d:any) => d.play.cards ? [{ card: d.play.cards[d.play.cards.length - 1], round: d, position: d.play.cards.length + 1 }] : [])
     .enter()
       .append('text')
       .attr('class', (d:any) => `faceup-card ${d.round.round.won ? 'winner' : 'loser'}`)

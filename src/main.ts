@@ -71,8 +71,7 @@ const statsPage = `
   </main>
 `
 
-const vizPage = `<main><div id='warViz'>${asciiOrderedList(game)}</div></main>`;
-const vizPage2 = `<main><svg id='warViz'></svg></main>`;
+const vizPage2 = `<main class='viz-bg'><svg id='warViz'></svg></main>`;
 
 if (app) {
   app.innerHTML = mode === Mode.Stats ? statsPage : vizPage2
