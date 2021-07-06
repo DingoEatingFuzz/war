@@ -86,7 +86,7 @@ export class Round {
   }
 }
 
-class Player {
+export class Player {
   position:number;
   hand:Array<Card>;
 

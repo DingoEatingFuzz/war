@@ -1,4 +1,4 @@
-import { Round, Play } from './war'
+import { Round, Play, Player, Match } from './war'
 import { Card } from './deck'
 import * as d3 from 'd3'
 
@@ -11,6 +11,7 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
 
   const reds = d3.quantize(d3.interpolateLab('#cc7050', '#c90000'), 14);
   const blacks = d3.quantize(d3.interpolateLab('#3a6266', '#07090c'), 14);
+  const aceColor = '#f8ff21';
 
   viz
     .attr('class', 'war-viz')
@@ -27,7 +28,7 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
 
   const $decks = $rounds
     .selectAll('.deck')
-    .data((d:Round) => d.lastMatch.plays)
+    .data((d:Round) => d.lastMatch.plays.map((play:Play) => ({ play, won: d.winner === play.player })))
     .enter()
       .append('g')
       .attr('class', 'deck')
@@ -35,14 +36,14 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
 
   $decks
     .selectAll('.deck-card')
-    .data((d:Play|null) => d ? d.hand : [])
+    .data((d:any) => (d.play ? d.play.hand : []).map((card:Card) => ({ card, won: d.won })))
     .enter()
       .append('rect')
       .attr('class', 'deck-card')
       .attr('x', (_:any, i:number) => i * deckCardWidth)
       .attr('width', deckCardWidth)
       .attr('height', roundHeight)
-      .style('fill', (d:Card) => false ? reds[d.rank] : blacks[d.rank]);
+      .style('fill', (d:any) => d.card.rank === 1 ? aceColor : d.won ? reds[d.card.rank] : blacks[d.card.rank]);
 
   // Each round has the following components:
   // 1. the deck of each player
