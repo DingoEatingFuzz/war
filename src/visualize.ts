@@ -30,24 +30,28 @@ export function aceTrace(rounds:Array<Round>, elem:SVGElement):void {
       .attr('class', 'round')
       .attr('transform', (_:Round, i:number) => `translate(0, ${i * (roundHeight + roundGap)})`);
 
-  const $decks = $rounds
+  const $players = $rounds
+    .selectAll('.player')
+    .data((d:Round) => roundByPlayers(d))
+    .enter()
+      .append('g')
+      .attr('class', 'player')
+      .attr('transform', (_:any, i:number) => `scale(${i === 0 ? '-1' : '1'} 1) translate(${i === 1 ? roundGap : 0} 0)`);
+
+  const $deck = $players
     .selectAll('.deck')
-    .data((d:Round) => d.lastMatch.plays.map((play:Play) => ({ play, won: d.winner === play.player })))
+    .data((d:any) => d.deck.map((card:Card) => ({ card, won: d.won })))
     .enter()
       .append('g')
       .attr('class', 'deck')
-      .attr('transform', (_:any, i:number) => `scale(${i === 0 ? '-1' : '1'} 1) translate(${i === 1 ? roundGap : 0} 0)`);
 
-  $decks
-    .selectAll('.deck-card')
-    .data((d:any) => (d.play ? d.play.hand : []).map((card:Card) => ({ card, won: d.won })))
-    .enter()
-      .append('rect')
-      .attr('class', 'deck-card')
-      .attr('x', (_:any, i:number) => i * deckCardWidth)
-      .attr('width', deckCardWidth)
-      .attr('height', roundHeight)
-      .style('fill', (d:any) => d.card.rank === 1 ? aceColor : d.won ? reds[d.card.rank] : blacks[d.card.rank]);
+  $deck
+    .append('rect')
+    .attr('class', 'deck-card')
+    .attr('x', (_:any, i:number) => i * deckCardWidth)
+    .attr('width', deckCardWidth)
+    .attr('height', roundHeight)
+    .style('fill', (d:any) => d.card.rank === 1 ? aceColor : d.won ? reds[d.card.rank] : blacks[d.card.rank]);
 
   // Each round has the following components:
   // 1. the deck of each player
@@ -73,12 +77,12 @@ function roundByPlayers(round:Round):any {
   const players:Array<Player> = round.matches[0].plays.map(p => p.player);
   return players.map((p:Player) => {
     const lastPlay = round.lastMatch.forPlayer(p);
-    return {
-      player: p,
-      won: p === round.winner,
-      deck: lastPlay ? lastPlay.hand : [],
-      matches: round.matches.map((m:Match) => m.forPlayer(p)),
-    }
+    return new PlayerRound(
+      p,
+      p === round.winner,
+      lastPlay ? lastPlay.hand : [],
+      round.matches.map((m:Match) => m.forPlayer(p))
+    );
   });
 }
 
@@ -97,4 +101,18 @@ export function asciiOrderedList(rounds:Array<Round>):string {
     return `<li class="${tie ? 'tie' : ''}">${playStrs.join(' v. ')}</li>`
   }).join('\n')
   return `<ol>${lis}</ol>`;
+}
+
+class PlayerRound {
+  public player:Player;
+  public won:boolean;
+  public deck:Array<Card>;
+  public plays:Array<Play|undefined>;
+
+  constructor(player:Player, won:boolean, deck:Array<Card>, plays:Array<Play|undefined>) {
+    this.player = player;
+    this.won = won;
+    this.deck = deck;
+    this.plays = plays;
+  }
 }
